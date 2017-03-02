@@ -1,9 +1,15 @@
 <?php
 
+declare(strict_types=1);
+
 require_once('vendor/autoload.php');
 
-use Endl\Stream\Stream;
+use Endl\Stream\Factory;
+use Endl\Pipe\Pipe;
 
-$stream = new Stream(fopen('php://output', 'w'));
-$stream->write("Hello World!\r\n");
-$stream->close();
+
+$input = Factory::createFromString('http://www.google.com', 'r');
+$output = Factory::createFromSTring('google.txt', 'w');
+$pipe = new Pipe($input, $output);
+$pipe->flush();
+$pipe->close();

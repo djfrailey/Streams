@@ -9,6 +9,8 @@ use \RuntimeException;
 
 class Stream implements StreamInterface
 {
+    use \Endl\Event\Emitter;
+
     protected $resource;
 
     const STREAM_READABLE = 1;
@@ -126,20 +128,18 @@ class Stream implements StreamInterface
     public function isReadable() 
     {
         $mode = $this->getMetadata('mode');
-        return $this->$modes[$mode] & self::STREAM_READABLE;
+        return $this->modes[$mode] & self::STREAM_READABLE;
     }
     
     public function read($length = 1024)
     {
-        if ($this->isReadable() === false) {
-            throw new RuntimeException("Cannot read from stream. Stream is not readable.");
-        }
-
         $read = fread($this->resource, $length);
 
         if ($read === false) {
             throw new RuntimeException("There was an error while reading from the stream.");
         }
+
+        $this->emit('onStreamRead', $read);
 
         return $read;
     }
@@ -168,5 +168,10 @@ class Stream implements StreamInterface
         }
 
         return null;
+    }
+
+    public function getResource()
+    {
+        return $this->resource;
     }
 }
